@@ -1,4 +1,4 @@
-#pragma comment(lib, "ws2_32")
+#pragma comment(lib, "ws2_32")	// 프로젝트 속성에 추가하는 전처리문 
 #include <winsock2.h>
 
 // 소켓 함수 오류 출력 후 종료
