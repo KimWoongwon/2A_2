@@ -1,0 +1,55 @@
+// 1번에서 계속
+// 마우스 오른쪽 클릭시 기존 10개의 점이 점점 커진다 5단계까지
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+	static int mousePosX;
+	static int mousePosY;
+	static int LclickCount;
+	static int RclickCount;
+	static double size;
+	static int xPosArr[10];
+	static int yPosArr[10];
+
+	switch (iMessage) 
+	{
+	case WM_CREATE:
+		LclickCount = 0;
+		RclickCount = 0;
+		size = 1.0f;
+		break;
+	case WM_LBUTTONDOWN:
+		SetPos(xPosArr, yPosArr, &LclickCount, lParam);
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
+	case WM_RBUTTONDOWN:
+		if (RclickCount >= 5)
+		{
+			RclickCount = 0;
+			size = 1.0f;
+		}
+		else
+		{
+			size *= 2;
+			RclickCount++;
+		}
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+
+		for (int i = 0; i < LclickCount; i++)
+		{
+			Ellipse(hdc, xPosArr[i] - size, yPosArr[i] - size, xPosArr[i] + size, yPosArr[i] + size);
+		}
+
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return(DefWindowProc(hWnd, iMessage, wParam, lParam));
+}

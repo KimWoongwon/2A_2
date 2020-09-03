@@ -1,0 +1,58 @@
+// 2번에 이어서 계속
+// 좌표 5개를 직접 입력해서 실행하기
+// 이벤트 메시지로 입력 처리하지 않기
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+	static int Count;
+	static int RclickCount;
+	static double size;
+	static POINT PosArr[10];
+
+	switch (iMessage) 
+	{
+	case WM_CREATE:
+		SetPos(PosArr, &Count, 90, 500);
+		SetPos(PosArr, &Count, 120, 200);
+		SetPos(PosArr, &Count, 450, 50);
+		SetPos(PosArr, &Count, 896, 688);
+		SetPos(PosArr, &Count, 654, 324);
+		SetPos(PosArr, &Count, 213, 154);
+		SetPos(PosArr, &Count, 487, 349);
+		SetPos(PosArr, &Count, 726, 943);
+		SetPos(PosArr, &Count, 534, 248);
+		SetPos(PosArr, &Count, 813, 487);
+		RclickCount = 0;
+		size = 1.0f;
+		break;
+	case WM_RBUTTONDOWN:
+		if (RclickCount >= 5)
+		{
+			RclickCount = 0;
+			size = 1.0f;
+		}
+		else
+		{
+			size *= 2;
+			RclickCount++;
+		}
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+
+		for (int i = 0; i < Count; i++)
+		{
+			Ellipse(hdc, PosArr[i].x - size, PosArr[i].y - size, PosArr[i].x + size, PosArr[i].y + size);
+		}
+
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return(DefWindowProc(hWnd, iMessage, wParam, lParam));
+}

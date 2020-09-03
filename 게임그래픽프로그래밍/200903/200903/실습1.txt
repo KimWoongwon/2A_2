@@ -1,0 +1,49 @@
+// 마우스 왼쪽 클릭시 점이 생성 
+// 10개까지 생성
+
+void SetPos(int* xArr, int* yArr, int* count, LPARAM _lparam)
+{
+	if (*count >= 10)
+		return;
+	xArr[*count] = LOWORD(_lparam);
+	yArr[(*count)++] = HIWORD(_lparam);
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+	HDC hdc;
+	PAINTSTRUCT ps;
+	static int mousePosX;
+	static int mousePosY;
+	static int clickCount;
+	static int xPosArr[10];
+	static int yPosArr[10];
+
+	switch (iMessage) 
+	{
+	case WM_CREATE:
+		clickCount = 0;
+		break;
+	case WM_LBUTTONDOWN:
+		SetPos(xPosArr, yPosArr, &clickCount, lParam);
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
+	case WM_RBUTTONDOWN:
+
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+
+		for (int i = 0; i < clickCount; i++)
+		{
+			Ellipse(hdc, )
+		}
+
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return(DefWindowProc(hWnd, iMessage, wParam, lParam));
+}
