@@ -2,7 +2,7 @@
 #include <winsock2.h>
 #include <stdio.h>
 
-#define TESTNAME "www.example.com"
+#define TESTNAME "www.naver.com"
 
 // 소켓 함수 오류 출력
 void err_display(char *msg)

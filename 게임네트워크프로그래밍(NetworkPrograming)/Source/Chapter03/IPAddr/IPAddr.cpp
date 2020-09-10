@@ -31,13 +31,14 @@ int main(int argc, char *argv[])
 	/*----------------*/
 	// 원래의 IPv6 주소 출력
 	char *ipv6test = "2001:0230:abcd:ffab:0023:eb00:ffff:1111";
+	int num = strlen(ipv6test);
 	printf("IPv6 주소(변환 전) = %s\n", ipv6test);
 
 	// WSAStringToAddress() 함수 연습
 	SOCKADDR_IN6 ipv6num;
 	int addrlen = sizeof(ipv6num);
-	WSAStringToAddress(ipv6test, AF_INET6, NULL,
-		(SOCKADDR *)&ipv6num, &addrlen);
+	WSAStringToAddress(ipv6test, AF_INET6, NULL,			// 윈도우 확장 함수 (윈도우에서만 사용가능한 함수)	
+		(SOCKADDR *)&ipv6num, &addrlen);					// 
 	printf("IPv6 주소(변환 후) = 0x");
 	for(int i=0; i<16; i++)
 		printf("%02x", ipv6num.sin6_addr.u.Byte[i]);
