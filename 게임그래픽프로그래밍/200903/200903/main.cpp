@@ -45,6 +45,12 @@ class Equation
 	float c;
 	
 public:
+	Equation()
+	{
+		a = 0;
+		b = 0;
+		c = 0;
+	}
 	Equation(int _a, int _b, int _c)
 	{
 		a = (float)_a;
@@ -60,9 +66,9 @@ public:
 	float getA() { return a; }
 	float getB() { return b; }
 	float getC() { return c; }
-	void setA(int _val) { a = (float)_val; }
-	void setB(int _val) { b = (float)_val; }
-	void setC(int _val) { c = -(float)_val; }
+	void setA(float _val) { a = _val; }
+	void setB(float _val) { b = _val; }
+	void setC(float _val) { c = _val; }
 };
 void SetPos(POINT* _posArr, int* count, int xpos, int ypos)
 {
@@ -88,37 +94,72 @@ void SetLinePos(Equation& _val, POINT* xArr, int Arrsize)
 	// y = (c/b) - (a/b)x	x-y=3
 	for (int i = 0; i < Arrsize; i++)
 	{
-		xArr[i].y = (_val.getC() / _val.getB()) - ((_val.getA() / _val.getB()) * xArr[i].x);
+		xArr[i].y = (-_val.getC() / _val.getB()) - ((_val.getA() / _val.getB()) * xArr[i].x);
 	}
 }
 
-bool GaussFunc(Equation& Line01, Equation& Line02, POINT outvalue)
+bool GaussFunc(Equation& Line01, Equation& Line02, POINT& outvalue)
 {
-	int a1, a2;
-	int b1, b2;
-	int c1, c2;
-	int i = 2;
-	while (1)
+	//01 : 4x + 5y - 2 = 0	
+	//02 : 2x + 3y - 4 = 0
+
+	Equation temp01(Line01), temp02(Line02);
+	float pivot;
+	if (Line01.getA() == 1)
 	{
-		if (Line01.getA() * i == Line02.getA())
+		pivot = Line01.getA();
+	}
+	else if(Line01.getA() != 1)
+	{
+		float aa = 1 / Line01.getA();
+		temp01.setA(Line01.getA() * aa);
+		temp01.setB(Line01.getB() * aa);
+		temp01.setC(Line01.getC() * aa);
+		pivot = Line01.getA();
+	}
+
+	float bb = -1.0f * Line02.getA();
+	temp02.setA(temp02.getA() + (temp01.getA() * bb));
+	temp02.setB(temp02.getB() + (temp01.getB() * bb));
+	temp02.setC(temp02.getC() + (temp01.getC() * bb));
+
+	if (temp02.getA() == 0 && temp02.getB() == 0 && temp02.getC() == 0)
+		return false;
+
+	static float x,y;
+	if (temp02.getA() == 0)
+	{
+		if (temp02.getB() != 1.0f)
 		{
-			int b = (Line01.getB() * i) + (Line02.getB() * i);
-			int c = (Line01.getC() * i) + (Line02.getC() * i);
-
-			int result = (c/b) % 1 == 0 ? (c/b) : 0;
-
-
+			float cc = 1 / temp02.getB();
+			temp02.setB(temp02.getB() * cc);
+			temp02.setC(temp02.getC() * cc);
+			if(temp02.getB() == 1.0f)
+				y = -temp02.getC();
 		}
-		else if (Line02.getA() * i == Line01.getA())
-		{
 
-		}
+		
+		x = -(temp01.getB() * y) - temp01.getC();
 
 	}
+
+	if (Line01.getA() * x + Line01.getB() * y + Line01.getC() != 0)
+		return false;
+
+	if (Line02.getA() * x + Line02.getB() * y + Line02.getC() != 0)
+		return false;
+
+	outvalue.x = x;
+	outvalue.y = y;
+	return true;
+
 }
 
-bool Substitution(Equation& Line01, Equation& Line02)
+bool Substitution(Equation& Line01, Equation& Line02, POINT& outValue)
 {
+	int x, y;
+
+
 	return true;
 }
 
@@ -134,9 +175,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	Equation LineEquation_01 = { 1,1,10 };
 	Equation LineEquation_02 = { 1,-1,30 };
 	Equation LineEquation_03 = { 2,3,60 };
+	Equation test01 = { 4,5,2 };
+	Equation test02 = { 2,3,4 };
 	static POINT Line_01[200];
 	static POINT Line_02[200];
 	static POINT Line_03[200];
+
+	static POINT answer;
 
 	switch (iMessage) 
 	{
@@ -161,7 +206,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			Line_03[i + 100].y = 0;
 		}
 		
-
+		GaussFunc(LineEquation_02, LineEquation_03, answer);
 		// 각 그래프 셋팅후 원점기준 좌표로 변경
 		SetLinePos(LineEquation_01, Line_01, 200);
 		ConvertingPos(Line_01, rect, 200);
@@ -201,3 +246,4 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	}
 	return(DefWindowProc(hWnd, iMessage, wParam, lParam));
 }
+

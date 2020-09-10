@@ -1,0 +1,116 @@
+struct Point
+{
+    float x, y;
+    Point()
+    {
+    }
+    Point(int x, int y)
+    {
+        this->x = x;
+        this->y = y;
+    }
+    Point(Point* P)
+    {
+        x = P->x;
+        y = P->y;
+    }
+};
+
+class Circle
+{
+    float r;
+    Point c;
+public:
+
+    Circle() {};
+    Circle(float r, float a, float b) :c(a, b) { this->r = r; }
+    Circle(Circle* C)
+    {
+        c.x = C->c.x;
+        c.y = C->c.y;
+        r = C->r;
+    }
+
+    float GetR() { return r; }
+    float Geta() { return c.x; }
+    float Getb() { return c.y; }
+    void SetR(float r) { this->r = r; }
+    void Seta(float a) { c.x = a; }
+    void Setb(float b) { c.y = b; }
+};
+
+int DrawCircle(HWND hWnd, Circle* cir, Point* Arr, int Density)
+{
+    float x;
+    float y;
+
+    int PointCount = 0;
+
+    for (x = -cir->GetR(); x <= cir->GetR(); x = x + 1.0 / (float)Density)
+    {
+        y = sqrt(float(cir->GetR() * cir->GetR() - x * x));
+
+        Arr[PointCount].x = x;
+        Arr[PointCount++].y = y;
+        Arr[PointCount].x = x;
+        Arr[PointCount++].y = -y;
+    }
+
+    return PointCount;
+}
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
+{
+    PAINTSTRUCT ps;
+    HDC hdc;
+
+    static Circle* cir;
+    static int R;
+
+    static Point* Arr;
+    static int ArrLen;
+    static int Density;
+
+    static COLORREF Red = RGB(255, 0, 0);
+
+    switch (iMessage) {
+
+    case WM_CREATE:
+        Density = 5;
+        R = 100;
+        cir = new Circle();
+        Arr = new Point[(R + 10) * 4 * Density]();
+        break;
+
+    case WM_LBUTTONDOWN:
+
+        cir->Seta(LOWORD(lParam));
+        cir->Setb(HIWORD(lParam));
+        cir->SetR(100);
+
+        ArrLen = DrawCircle(hWnd, cir, Arr, Density);
+
+        InvalidateRect(hWnd, NULL, TRUE);
+        break;
+
+    case WM_PAINT:
+
+        hdc = BeginPaint(hWnd, &ps);
+
+        for (int i = 0; i < ArrLen; i++)
+        {
+            SetPixel(hdc, Arr[i].x + cir->Geta(), Arr[i].y + cir->Getb(), Red);
+        }
+
+        EndPaint(hWnd, &ps);
+
+        break;
+
+    case WM_DESTROY:
+        delete cir;
+        delete[] Arr;
+        PostQuitMessage(0);
+        return 0;
+    }
+    return(DefWindowProc(hWnd, iMessage, wParam, lParam));
+}
