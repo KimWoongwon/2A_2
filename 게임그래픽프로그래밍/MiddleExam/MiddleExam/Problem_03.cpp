@@ -43,10 +43,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 
 #define AxisSize 2000
 
-Point ConvertingWorldPos(HWND hWnd, Point pos)
+Point ConvertingPos_Descartes(RECT cRect, Point pos)
 {
-    RECT cRect;
-    GetClientRect(hWnd, &cRect);
     int CenterX = cRect.right / 2;
     int CenterY = cRect.bottom / 2;
 
@@ -55,10 +53,8 @@ Point ConvertingWorldPos(HWND hWnd, Point pos)
     temp.y = CenterY - pos.y;
     return temp;
 }
-Point ConvertingLocalPos(HWND hWnd, Point pos)
+Point ConvertingPos_Windows(RECT cRect, Point pos)
 {
-    RECT cRect;
-    GetClientRect(hWnd, &cRect);
     int CenterX = cRect.right / 2;
     int CenterY = cRect.bottom / 2;
 
@@ -71,31 +67,29 @@ Point ConvertingLocalPos(HWND hWnd, Point pos)
 void DrawLine(HWND hWnd, Point a, Point b, COLORREF color)
 {
     HDC hdc;
+    RECT rect;
     hdc = GetDC(hWnd);
-    int DomainCount;
-
+    GetClientRect(hWnd, &rect);
+    
     float dx = b.x - a.x;
     float dy = b.y - a.y;
 
-    float x = a.x;
-    float y = a.y;
-
-    DomainCount = abs((int)dx) > abs((int)dy) ? abs((int)dx):abs((int)dy);
+    int DomainCount = abs((int)dx) > abs((int)dy) ? abs((int)dx):abs((int)dy);
     dx = dx / DomainCount;
     dy = dy / DomainCount;
 
+    
     Point Wtemp, Ltemp;
+    Ltemp.x = a.x;
+    Ltemp.y = a.y;
 
     while (1)
     {
-        Ltemp.x = x;
-        Ltemp.y = y;
-
-        Wtemp = ConvertingWorldPos(hWnd, Ltemp);
+        Wtemp = ConvertingPos_Descartes(rect, Ltemp);
         SetPixel(hdc, Wtemp.x, Wtemp.y, color);
 
-        x += dx;
-        y += dy;
+        Ltemp.x += dx;
+        Ltemp.y += dy;
 
         DomainCount--;
         if (DomainCount < 0)
@@ -131,7 +125,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     case WM_LBUTTONDOWN:
         mpos.x = LOWORD(lParam);
         mpos.y = HIWORD(lParam);
-        convert = ConvertingLocalPos(hWnd, mpos);
+        convert = ConvertingPos_Windows(rect, mpos);
         if (toggle)
         {
             A.setx(convert.x);
