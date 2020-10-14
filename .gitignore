@@ -1,3 +1,4 @@
+*.zip
 
 # Created by https://www.toptal.com/developers/gitignore/api/unity
 # Edit at https://www.toptal.com/developers/gitignore?templates=unity
@@ -425,12 +426,17 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+
 venv/
 .idea/
 
 ### PyCharm ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+Lib/
+Scripts/
+pyvenv.cfg
 
 # User-specific stuff
 .idea/**/workspace.xml
