@@ -71,25 +71,25 @@ void DrawLine(HWND hWnd, Point a, Point b, COLORREF color)
     hdc = GetDC(hWnd);
     GetClientRect(hWnd, &rect);
     
-    float dx = b.x - a.x;
-    float dy = b.y - a.y;
+    float xCount = b.x - a.x;
+    float yCount = b.y - a.y;
 
-    int DomainCount = abs((int)dx) > abs((int)dy) ? abs((int)dx):abs((int)dy);
-    dx = dx / DomainCount;
-    dy = dy / DomainCount;
+    int DomainCount = abs((int)xCount) > abs((int)yCount) ? abs((int)xCount):abs((int)yCount);
+    float Increase_X = xCount / DomainCount;
+    float Increase_Y = yCount / DomainCount;
 
     
-    Point Wtemp, Ltemp;
-    Ltemp.x = a.x;
-    Ltemp.y = a.y;
+    Point Dtemp, temp;
+    temp.x = a.x;
+    temp.y = a.y;
 
     while (1)
     {
-        Wtemp = ConvertingPos_Descartes(rect, Ltemp);
-        SetPixel(hdc, Wtemp.x, Wtemp.y, color);
+        Dtemp = ConvertingPos_Descartes(rect, temp);
+        SetPixel(hdc, Dtemp.x, Dtemp.y, color);
 
-        Ltemp.x += dx;
-        Ltemp.y += dy;
+        temp.x += Increase_X;
+        temp.y += Increase_Y;
 
         DomainCount--;
         if (DomainCount < 0)

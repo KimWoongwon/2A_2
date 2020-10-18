@@ -40,7 +40,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance
 
 #define AxisSize 2000
 
-void ConvertingArrPos_Descartes(Point* _posArr, RECT cRect, int Arrsize)
+void ConvertingArrPos_Descartes(Point* _posArr, RECT cRect, int Arrsize)	
 {
 	int CenterX = cRect.right / 2;
 	int CenterY = cRect.bottom / 2;
@@ -59,7 +59,7 @@ void ConvertingPos_Descartes(Point* _pos, RECT cRect)
 	_pos->y = CenterY - _pos->y;
 }
 
-
+// Point to Point
 void PtoPSetLine(Point _first, Point _sceond, Point* _posArr, int Arrsize)
 {
 	if (_sceond.x - _first.x == 0)
@@ -67,6 +67,7 @@ void PtoPSetLine(Point _first, Point _sceond, Point* _posArr, int Arrsize)
 	if (_sceond.y - _first.y == 0)
 		return;
 
+	// y = mx + b
 	float m = (_sceond.y - _first.y) / (_sceond.x - _first.x);	// 기울기
 	float b = _first.y - m * _first.x;
 
@@ -128,9 +129,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			//x축 y축 그리기
 			SetPixel(hdc, xAxis[i].x, xAxis[i].y, RGB(0, 0, 0));
 			SetPixel(hdc, yAxis[i].x, yAxis[i].y, RGB(0, 0, 0));
-			SetPixel(hdc, Line_01[i].x, Line_01[i].y, RGB(255, 0, 0));
+			SetPixel(hdc, Line_01[i].x, Line_01[i].y, RGB(255, 0, 0));	// 두점을 지나는 직선 보기
 		}
 
+		// 점찍히는 위치보기
 		Ellipse(hdc, First.x - 5, First.y - 5, First.x + 5, First.y + 5);
 		TextOut(hdc, First.x, First.y - 20, TEXT("First"), 5);
 		Ellipse(hdc, Scenod.x - 5, Scenod.y - 5, Scenod.x + 5, Scenod.y + 5);
