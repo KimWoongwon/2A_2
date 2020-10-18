@@ -1,3 +1,5 @@
+# 원점과 임의의 점의 거리구하기
+
 def Distance(x = 0,y = 0):
     if x == 0 and y == 0:
         x = int(input('x좌표를 입력하세요 : '))
