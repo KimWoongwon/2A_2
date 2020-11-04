@@ -140,6 +140,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matrix3x3.cpp" />
+    <ClCompile Include="Matrix4x4.cpp" />
+    <ClCompile Include="Triangle2D.cpp" />
     <ClCompile Include="Vector2D.cpp" />
     <ClCompile Include="Vector3D.cpp" />
   </ItemGroup>
@@ -147,8 +150,11 @@
     <Text Include="01.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Matrix3x3.h" />
+    <ClInclude Include="Matrix4x4.h" />
     <ClInclude Include="Vector2D.h" />
     <ClInclude Include="Vector3D.h" />
+    <ClInclude Include="Triangle2D.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

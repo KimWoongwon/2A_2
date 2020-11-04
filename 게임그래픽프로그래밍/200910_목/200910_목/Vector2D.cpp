@@ -1,3 +1,4 @@
+
 #include "Vector2D.h"
 
 Point::Point()
@@ -18,20 +19,33 @@ Vector2D::Vector2D()
 {
 	x = 0;
 	y = 0;
+	w = 1;
 	size = 0;
 }
 Vector2D::Vector2D(float _x, float _y)
 {
 	x = _x;
 	y = _y;
+	w = 1;
 	size = powf(x, 2) + powf(y, 2);
 }
+
+Vector2D::Vector2D(float _x, float _y, float _w)
+{
+	x = _x;
+	y = _y;
+	w = _w;
+	size = powf(x, 2) + powf(y, 2);
+}
+
 Vector2D::Vector2D(Vector2D& _vec)
 {
 	x = _vec.x;
 	y = _vec.y;
+	w = _vec.w;
 	size = _vec.size;
 }
+
 Vector2D::~Vector2D()
 {
 }
@@ -60,12 +74,21 @@ Vector2D Vector2D::operator-(Vector2D& _val)
 
 float Vector2D::getx() { return x; }
 float Vector2D::gety() { return y; }
+float Vector2D::getw() { return w; }
 Point Vector2D::getPos() { return Point(x, y); }
 
 void Vector2D::setsize()
 {
 	size = powf(x, 2) + powf(y, 2);
 }
+void Vector2D::setZero()
+{
+	x = 0;
+	y = 0;
+	w = 1;
+	size = 0;
+}
+
 void Vector2D::setx(float _val)
 {
 	x = _val;
@@ -74,6 +97,24 @@ void Vector2D::setx(float _val)
 void Vector2D::sety(float _val)
 {
 	y = _val;
+	setsize();
+}
+void Vector2D::setw(float _val)
+{
+	w = _val;
+}
+void Vector2D::setPos(Point _val)
+{
+	x = _val.x;
+	y = _val.y;
+	w = 1;
+	setsize();
+}
+void Vector2D::setPos(float _x, float _y)
+{
+	x = _x;
+	y = _y;
+	w = 1;
 	setsize();
 }
 
@@ -87,15 +128,20 @@ Vector2D Vector2D::normalizaion()	// 단위벡터 계산
 	return temp;
 }
 
-float Vector2D::dot_Product(Vector2D _vec)	// 내적값 계산
+float Vector2D::dot_Product(Vector2D& _vec)	// 내적값 계산
 {
 	// -7
 	float dot = (this->x * _vec.getx()) + (this->y * _vec.gety());
 	return dot;
 }
 
-float Vector2D::GetCos(Vector2D _vec)			// 코사인값 계산
+float Vector2D::GetCos(Vector2D& _vec)			// 코사인값 계산
 {
 	float theta = dot_Product(_vec) / (this->getSize() * _vec.getSize());
 	return cos(theta);
+}
+
+void Vector2D::Show()
+{
+	printf("%3.0f %3.0f %3.0f", this->x, this->y, this->w);
 }

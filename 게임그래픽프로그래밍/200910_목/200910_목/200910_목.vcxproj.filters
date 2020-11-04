@@ -24,6 +24,15 @@
     <ClCompile Include="Vector2D.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Matrix3x3.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix4x4.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Triangle2D.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="01.txt">
@@ -35,6 +44,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Vector3D.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3x3.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix4x4.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Triangle2D.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

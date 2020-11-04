@@ -506,6 +506,7 @@ void FileLoad()
 		memcpy(ptr, &info, sizeof(_UserInfo));
 		UserInfo[JoinCount++] = ptr;
 	}
+	fclose(fp);
 }
 void FileSave(_UserInfo* info)
 {
@@ -521,6 +522,7 @@ void FileSave(_UserInfo* info)
 	{
 		err_quit("파일저장실패");
 	}
+	fclose(fp);
 }
 #pragma endregion
 

@@ -67,7 +67,7 @@ struct _ClientInfo
 	char buf[BUFSIZE];
 };
 
-int Packing(char* _buf, PROTOCOL _protocol, RES_LOGIN _result, const char* _msg)
+int Packing(char* _buf, PROTOCOL _protocol, int _result, const char* _msg)
 {
 	// login result
 	char* ptr = _buf + sizeof(int);
@@ -77,9 +77,9 @@ int Packing(char* _buf, PROTOCOL _protocol, RES_LOGIN _result, const char* _msg)
 	size += sizeof(PROTOCOL);
 	ptr += sizeof(PROTOCOL);
 
-	memcpy(ptr, &_result, sizeof(RES_LOGIN));
-	size += sizeof(RES_LOGIN);
-	ptr += sizeof(RES_LOGIN);
+	memcpy(ptr, &_result, sizeof(int));
+	size += sizeof(int);
+	ptr += sizeof(int);
 
 	int msgsize = strlen(_msg);
 	memcpy(ptr, &msgsize, sizeof(int));

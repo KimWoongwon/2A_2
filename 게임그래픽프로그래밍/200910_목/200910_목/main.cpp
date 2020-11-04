@@ -1,5 +1,7 @@
 #include <windows.h>
 #include "Vector2D.h"
+#include "Matrix3x3.h"
+#include "Triangle2D.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE g_hInst;
@@ -105,6 +107,79 @@ void DrawLine(HWND hWnd, Point a, Point b, COLORREF color)
     ReleaseDC(hWnd, hdc);
 }
 
+
+void DrawTriangle(HWND hWnd, Point a, Point b, Point c) 
+{
+    DrawLine(hWnd, a, b, RGB(0, 0, 0));
+    DrawLine(hWnd, b, c, RGB(0, 0, 0));
+    DrawLine(hWnd, c, a, RGB(0, 0, 0));
+}
+
+void DrawTriangle(HWND hWnd, Triangle2D& T)
+{
+    DrawLine(hWnd, T.getA().getPos(), T.getB().getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, T.getB().getPos(), T.getC().getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, T.getC().getPos(), T.getA().getPos(), RGB(0, 0, 0));
+}
+
+void SetMoveValue(Point a, Point b, Point* _val, int size)
+{
+    *_val = Point(0, 0);
+
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+
+    dx = dx / (float)size;
+    dy = dy / (float)size;
+
+    _val->x = dx;
+    _val->y = dy;
+}
+
+//void moveFunc(Vector2D* vArr, Point& _moveval)
+//{
+//    for (int i = 0; i < 3; i++)
+//    {
+//        vArr[i].setx(vArr[i].getx() + _moveval.x);
+//        vArr[i].sety(vArr[i].gety() + _moveval.y);
+//    }
+//}
+//
+//void Triangle_Translate(Vector2D* T, Point& _moveval)
+//{
+//    Matrix3x3 Trans_value;
+//    Trans_value.setEntry(2, 0, _moveval.x);
+//    Trans_value.setEntry(2, 1, _moveval.y);
+//
+//    for (int i = 0; i < Triangle_Vertex_Count; i++)
+//    {
+//        T[i] = Trans_value.Vec_Matrix_Multiple(T[i]);
+//    }
+//}
+//
+//void Triangle_Copy(Vector2D* original, Vector2D* current)
+//{
+//    for (int i = 0; i < 3; i++)
+//    {
+//        current[i] = original[i];
+//    }
+//}
+
+//void Triangle_Move(Triangle2D* original, Triangle2D* current, Point& _moveval)
+//{
+//    moveFunc(original, _moveval);
+//    Triangle_Copy(original, current);
+//}
+//
+//
+//void Triangle_Move_Matrix(Triangle2D* original, Triangle2D* current, Point& _moveval)
+//{
+//    Triangle_Translate(original, _moveval);
+//    Triangle_Copy(original, current);
+//}
+
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
@@ -114,41 +189,91 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     static Point yAxis[AxisSize];
 
     static Point mpos, convert;
-    static Vector2D A; 
-    static Vector2D B;
-    static Vector2D plus, minus;
+    static Triangle2D T;       // 실제 변경
+    static Triangle2D CurrT;   // Paint 참조
 
-    static bool toggle;
+    static Point moveValue; // 증가값
+    // 항상 자료구조 생각하기
 
+    static bool toggle = 0;
+    static bool is_keyinput = false;
+    static int i = 0;
     switch (iMessage) {
-
     case WM_CREATE:
         GetClientRect(hWnd, &rect);
 
-        toggle = true;
+        T = Triangle2D(0,125,-75,0,75,0);
+        CurrT = T;
 
+        /*T[0].setPos(0, 125);
+        T[1].setPos(-75, 0);
+        T[2].setPos(75, 0);
+        Triangle_Copy(T, CurrT);*/
+
+        SetTimer(hWnd, 1, 50, NULL);
+        break;
+    case WM_KEYDOWN:
+        is_keyinput = true;
+        break;
+    case WM_CHAR:
+        moveValue = Point(0, 0);
+        switch (wParam)
+        {
+        case 'w':
+        case 'W':
+            moveValue.y = 10.0f;
+            break;
+        case 's':
+        case 'S':
+            moveValue.y = -10.0f;
+            break;
+        case 'a':
+        case 'A':
+            moveValue.x = -10.0f;
+            break;
+        case 'd':
+        case 'D':
+            moveValue.x = 10.0f;
+            break;
+        }
+        break;
+    case WM_KEYUP:
+        is_keyinput = false;
+        moveValue = Point(0, 0);
         break;
     case WM_LBUTTONDOWN:
-        mpos.x = LOWORD(lParam);
-        mpos.y = HIWORD(lParam);
-        convert = ConvertingLocalPos(hWnd, mpos);
+        if (!toggle)
+        {
+            moveValue = Point(0, 0);
+            i = 0;
+            mpos.x = LOWORD(lParam);
+            mpos.y = HIWORD(lParam);
+            convert = ConvertingLocalPos(hWnd, mpos);
+            SetMoveValue(T.getCenter().getPos(), convert, &moveValue, 10);   // 증가값 계산
+            toggle = true;
+        }
+        break;  //
+    case WM_TIMER:
         if (toggle)
         {
-            A.setx(convert.x);
-            A.sety(convert.y);
-            toggle = !toggle;
+            if (i++ >= 10)
+            {
+                toggle = false;
+                break;
+            }
+            T.Move(moveValue);
+            CurrT = T;
+            //Triangle_Move_Matrix(T, CurrT, moveValue);
         }
-        else
-        {
-            B.setx(convert.x);
-            B.sety(convert.y);
-            toggle = !toggle;
 
-            plus = A + B;
-            minus = A - B;
-            InvalidateRect(hWnd, NULL, TRUE);
+        if (is_keyinput)
+        {
+            T.Translate(moveValue);
+            CurrT = T;
         }
-        
+            //Triangle_Move_Matrix(T, CurrT, moveValue);
+
+        InvalidateRect(hWnd, NULL, TRUE);
         break;
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
@@ -159,10 +284,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             SetPixel(hdc, rect.right / 2, i, RGB(0, 0, 0));
         }
 
-        DrawLine(hWnd, Point(0, 0), A.getPos(), RGB(0, 0, 0));
-        DrawLine(hWnd, Point(0, 0), B.getPos(), RGB(0, 0, 0));
-        DrawLine(hWnd, Point(0, 0), plus.getPos(), RGB(0, 0, 255));
-        DrawLine(hWnd, Point(0, 0), minus.getPos(), RGB(255, 0, 0));
+        DrawTriangle(hWnd, CurrT);
 
         EndPaint(hWnd, &ps);
         break;
