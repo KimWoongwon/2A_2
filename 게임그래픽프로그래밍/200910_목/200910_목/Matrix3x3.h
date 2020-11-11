@@ -1,7 +1,6 @@
 #pragma once
 #include <stdio.h>
-#include "Vector2D.h"
-
+#include "Matrix1x3.h"
 
 class Matrix3x3
 {
@@ -33,7 +32,8 @@ public:
 	Matrix3x3 Minus(Matrix3x3& _m);
 	Matrix3x3 Multiple(Matrix3x3& _m);
 
-	Vector2D Vec_Matrix_Multiple(Vector2D& v1);
+	Matrix1x3 Matrix1x3_Multiple(Matrix1x3& v1);
+	Vector2D Vector2D_Multiple(Vector2D& v1);
 
 	void Show();
 };

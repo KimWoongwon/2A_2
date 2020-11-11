@@ -136,49 +136,10 @@ void SetMoveValue(Point a, Point b, Point* _val, int size)
     _val->y = dy;
 }
 
-//void moveFunc(Vector2D* vArr, Point& _moveval)
-//{
-//    for (int i = 0; i < 3; i++)
-//    {
-//        vArr[i].setx(vArr[i].getx() + _moveval.x);
-//        vArr[i].sety(vArr[i].gety() + _moveval.y);
-//    }
-//}
-//
-//void Triangle_Translate(Vector2D* T, Point& _moveval)
-//{
-//    Matrix3x3 Trans_value;
-//    Trans_value.setEntry(2, 0, _moveval.x);
-//    Trans_value.setEntry(2, 1, _moveval.y);
-//
-//    for (int i = 0; i < Triangle_Vertex_Count; i++)
-//    {
-//        T[i] = Trans_value.Vec_Matrix_Multiple(T[i]);
-//    }
-//}
-//
-//void Triangle_Copy(Vector2D* original, Vector2D* current)
-//{
-//    for (int i = 0; i < 3; i++)
-//    {
-//        current[i] = original[i];
-//    }
-//}
+void RotateZ(Triangle2D& _T, float theta)
+{
 
-//void Triangle_Move(Triangle2D* original, Triangle2D* current, Point& _moveval)
-//{
-//    moveFunc(original, _moveval);
-//    Triangle_Copy(original, current);
-//}
-//
-//
-//void Triangle_Move_Matrix(Triangle2D* original, Triangle2D* current, Point& _moveval)
-//{
-//    Triangle_Translate(original, _moveval);
-//    Triangle_Copy(original, current);
-//}
-
-
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
@@ -192,6 +153,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     static Triangle2D T;       // 실제 변경
     static Triangle2D CurrT;   // Paint 참조
 
+    static float XScale = 1;
+    static float YScale = 1;
+    static float rotValue;
     static Point moveValue; // 증가값
     // 항상 자료구조 생각하기
 
@@ -219,6 +183,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         moveValue = Point(0, 0);
         switch (wParam)
         {
+        case 'y':
+        case 'Y':
+            YScale = 1.01f;
+            break;
+        case 'x':
+        case 'X':
+            XScale = 1.01f;
+            break;
+        case 'r':
+        case 'R':
+            rotValue = 0.25f;
+            break;
         case 'w':
         case 'W':
             moveValue.y = 10.0f;
@@ -239,6 +215,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         break;
     case WM_KEYUP:
         is_keyinput = false;
+        XScale = 1;
+        YScale = 1;
+        rotValue = 0;
         moveValue = Point(0, 0);
         break;
     case WM_LBUTTONDOWN:
@@ -268,7 +247,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
         if (is_keyinput)
         {
-            T.Translate(moveValue);
+            T.Translate(moveValue);     // 이건 이동 키
+            T.Rotate_Z(rotValue);       // 
+            T.Scale(XScale, YScale, 1);
             CurrT = T;
         }
             //Triangle_Move_Matrix(T, CurrT, moveValue);

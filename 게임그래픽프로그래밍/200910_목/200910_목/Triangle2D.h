@@ -1,7 +1,7 @@
 #pragma once
+#include <math.h>
 #include "Matrix3x3.h"
-
-#define Triangle_Vertex_Count 3
+#include "Matrix4x4.h"
 
 class Triangle2D
 {
@@ -16,8 +16,9 @@ private:
 		};
 		Vector2D vertex[3];
 	};
-	Vector2D Center;
 
+	const static int Vertex_Count = 3;
+	Vector2D Center;
 public:
 	Triangle2D();
 	Triangle2D(Triangle2D&);
@@ -38,4 +39,8 @@ public:
 	//void Copy(Triangle2D&);
 	void Move(Point&);
 	void Translate(Point&);
+	void Rotate_Z(float);
+	//void Rotate_X(float);
+	//void Rotate_Y(float);
+	void Scale(float, float, float);
 };

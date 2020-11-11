@@ -287,8 +287,9 @@ _ClientInfo* AddClientInfo(SOCKET sock, SOCKADDR_IN addr)
 	memcpy(&ptr->addr, &addr, sizeof(addr));
 	ptr->login = false;
 
+	EnterCriticalSection(&cs);
 	ClientInfo[Count++] = ptr;
-
+	LeaveCriticalSection(&cs);
 	return ptr;
 }
 void ReMoveClientInfo(_ClientInfo* ptr)
@@ -296,6 +297,7 @@ void ReMoveClientInfo(_ClientInfo* ptr)
 	printf("\n[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
 		inet_ntoa(ptr->addr.sin_addr), ntohs(ptr->addr.sin_port));
 
+	EnterCriticalSection(&cs);
 	for (int i = 0; i < Count; i++)
 	{
 		if (ClientInfo[i] == ptr)
@@ -310,6 +312,7 @@ void ReMoveClientInfo(_ClientInfo* ptr)
 		}
 	}
 	Count--;
+	LeaveCriticalSection(&cs);
 }
 #pragma endregion
 
@@ -427,16 +430,19 @@ void UnPacking(const char* _buf, char* _str1, char* _str2)
 #pragma region Login_System_Function
 int JoinProcess(_UserInfo _info)
 {
+	EnterCriticalSection(&cs);
 	for (int i = 0; i < JoinCount; i++)
 	{
 		if (!strcmp(UserInfo[i]->id, _info.id))
 		{
+			LeaveCriticalSection(&cs);
 			return ID_EXIST;
 		}
 	}
 
 	UserInfo[JoinCount] = new _UserInfo(_info);
 	++JoinCount;
+	LeaveCriticalSection(&cs);
 	return JOIN_SUCCESS;
 }
 int LoginProcess(_UserInfo _info)
@@ -488,14 +494,16 @@ void DropProcess(_ClientInfo* _ptr)
 }
 _UserInfo* SearchUserInfo(const char* _Id)
 {
+	EnterCriticalSection(&cs);
 	for (int i = 0; i < JoinCount; i++)
 	{
 		if (!strcmp(UserInfo[i]->id, _Id))
 		{
+			LeaveCriticalSection(&cs);
 			return UserInfo[i];
 		}
 	}
-
+	LeaveCriticalSection(&cs);
 	return nullptr;
 }
 #pragma endregion

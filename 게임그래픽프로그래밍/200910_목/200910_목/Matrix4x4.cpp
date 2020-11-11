@@ -53,6 +53,20 @@ Matrix4x4::~Matrix4x4()
 
 }
 
+void Matrix4x4::Init()
+{
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			if (i == j)
+				matrix[i][j] = 1;
+			else
+				matrix[i][j] = 0;
+		}
+	}
+}
+
 void Matrix4x4::setEntry(int a, int b, float _val)
 {
 	if (a >= size || a < 0 || b >= size || b < 0)
@@ -133,7 +147,59 @@ Matrix4x4 Matrix4x4::Multiple(Matrix4x4& _m)
 	return temp;
 }
 
-Vector3D Matrix4x4::Vec_Matrix_Multiple(Vector3D v1)
+void Matrix4x4::MatrixRotate_X(float _angle)
+{
+	Init();
+	_22 = cosf(_angle);
+	_23 = sinf(_angle);
+	_32 = -sinf(_angle);
+	_33 = cosf(_angle);
+
+}
+void Matrix4x4::MatrixRotate_Y(float _angle)
+{
+	Init();
+	_11 = cosf(_angle);
+	_13 = sinf(_angle);
+	_31 = -sinf(_angle);
+	_33 = cosf(_angle);
+}
+void Matrix4x4::MatrixRotate_Z(float _angle)
+{
+	Init();
+	_11 = cosf(_angle);
+	_12 = sinf(_angle);
+	_21 = -sinf(_angle);
+	_22 = cosf(_angle);
+}
+void Matrix4x4::MatrixTranslate(float _dx, float _dy, float _dz)
+{
+	Init();
+	_31 = _dx;
+	_32 = _dy;
+	_33 = _dz;
+}
+void Matrix4x4::MatrixScaling(float _Sx, float _Sy, float _Sz)
+{
+	Init();
+	_11 = _Sx;
+	_22 = _Sy;
+	_33 = _Sz;
+}
+
+Matrix1x4 Matrix4x4::Matrix1x4_Multiple(Matrix1x4& _m)
+{
+	Matrix1x4 temp;
+
+	temp.setEntry(0, (_m.getEntry(0) * matrix[0][0]) + (_m.getEntry(1) * matrix[1][0]) + (_m.getEntry(2) * matrix[2][0]) + (_m.getEntry(3) * matrix[3][0]));
+	temp.setEntry(1, (_m.getEntry(0) * matrix[0][1]) + (_m.getEntry(1) * matrix[1][1]) + (_m.getEntry(2) * matrix[2][1]) + (_m.getEntry(3) * matrix[3][1]));
+	temp.setEntry(2, (_m.getEntry(0) * matrix[0][2]) + (_m.getEntry(1) * matrix[1][2]) + (_m.getEntry(2) * matrix[2][2]) + (_m.getEntry(3) * matrix[3][2]));
+	temp.setEntry(3, (_m.getEntry(0) * matrix[0][3]) + (_m.getEntry(1) * matrix[1][3]) + (_m.getEntry(2) * matrix[2][3]) + (_m.getEntry(3) * matrix[3][3]));
+
+	return temp;
+}
+
+Vector3D Matrix4x4::Vector3D_Multiple(Vector3D& v1)
 {
 	Vector3D temp;
 

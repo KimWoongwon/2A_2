@@ -1,6 +1,6 @@
 #pragma once
 #include <stdio.h>
-#include "Vector3D.h"
+#include "Matrix1x4.h"
 
 class Matrix4x4
 {
@@ -24,6 +24,7 @@ public:
 	Matrix4x4(Matrix4x4& _m);
 	~Matrix4x4();
 
+	void Init();
 	void setEntry(int, int, float);
 	float getEntry(int, int);
 
@@ -33,7 +34,14 @@ public:
 	Matrix4x4 Minus(Matrix4x4& _m);
 	Matrix4x4 Multiple(Matrix4x4& _m);
 
-	Vector3D Vec_Matrix_Multiple(Vector3D v1);
+	void MatrixRotate_X(float);
+	void MatrixRotate_Y(float);
+	void MatrixRotate_Z(float);
+	void MatrixTranslate(float, float, float);
+	void MatrixScaling(float, float, float);
+
+	Matrix1x4 Matrix1x4_Multiple(Matrix1x4&);
+	Vector3D Vector3D_Multiple(Vector3D&);
 
 	void Show();
 };

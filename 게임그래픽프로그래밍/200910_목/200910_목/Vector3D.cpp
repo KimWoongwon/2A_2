@@ -20,6 +20,8 @@ Point3D::Point3D(Point3D* P)
 	z = P->z;
 }
 
+//----------------------------------------------------------------------------------------------------
+
 Vector3D::Vector3D()
 {
 	x = 0;
@@ -95,6 +97,13 @@ void Vector3D::setsize()
 {
 	size = powf(x, 2) + powf(y, 2) + powf(z, 2);
 }
+void Vector3D::setZero()
+{
+	x = 0;
+	y = 0;
+	w = 1;
+	size = 0;
+}
 
 void Vector3D::setx(float _val)
 {
@@ -150,3 +159,9 @@ void Vector3D::Show()
 	printf("%3.0f %3.0f %3.0f %3.0f", this->x, this->y, this->z, this->w);
 }
 // p = v.n x n
+
+Vector3D Vector3D::Zero()
+{
+	Vector3D temp(0, 0, 0, 0);
+	return temp;
+}

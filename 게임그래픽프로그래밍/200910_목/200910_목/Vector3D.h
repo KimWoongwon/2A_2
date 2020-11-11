@@ -34,6 +34,9 @@ public:
 	Point3D getPos();
 
 	void setsize();
+	void setZero();
+	static Vector3D Zero();
+
 	void setx(float);
 	void sety(float);
 	void setz(float);

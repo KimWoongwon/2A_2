@@ -145,3 +145,10 @@ void Vector2D::Show()
 {
 	printf("%3.0f %3.0f %3.0f", this->x, this->y, this->w);
 }
+
+
+//Vector2D Vector2D::Zero()
+//{
+//	Vector2D temp(0,0,0);
+//	return temp;
+//}

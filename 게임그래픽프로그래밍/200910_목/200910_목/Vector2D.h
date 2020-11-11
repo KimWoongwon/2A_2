@@ -34,6 +34,7 @@ public:
 
 	void setsize();
 	void setZero();
+	//static Vector2D Zero();
 
 	void setx(float);
 	void sety(float);

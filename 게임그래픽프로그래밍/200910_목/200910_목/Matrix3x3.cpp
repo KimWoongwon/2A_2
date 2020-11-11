@@ -137,7 +137,16 @@ Matrix3x3 Matrix3x3::Multiple(Matrix3x3& _m)
 	return temp;
 }
 
-Vector2D Matrix3x3::Vec_Matrix_Multiple(Vector2D& v1)
+Matrix1x3 Matrix3x3::Matrix1x3_Multiple(Matrix1x3& _m)
+{
+	Matrix1x3 temp;
+	temp.setEntry(0, ((_m.getEntry(0) * matrix[0][0]) + (_m.getEntry(1) * matrix[1][0]) + (_m.getEntry(2) * matrix[2][0])));
+	temp.setEntry(1, ((_m.getEntry(0) * matrix[0][1]) + (_m.getEntry(1) * matrix[1][1]) + (_m.getEntry(2) * matrix[2][1])));
+	temp.setEntry(2, ((_m.getEntry(0) * matrix[0][2]) + (_m.getEntry(1) * matrix[1][2]) + (_m.getEntry(2) * matrix[2][2])));
+	return temp;
+}
+
+Vector2D Matrix3x3::Vector2D_Multiple(Vector2D& v1)
 {
 	Vector2D temp;
 
