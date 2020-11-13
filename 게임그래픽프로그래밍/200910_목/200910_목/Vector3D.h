@@ -35,6 +35,7 @@ public:
 
 	void setsize();
 	void setZero();
+	
 	static Vector3D Zero();
 
 	void setx(float);

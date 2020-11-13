@@ -1,7 +1,5 @@
 #include <windows.h>
-#include "Vector2D.h"
-#include "Matrix3x3.h"
-#include "Triangle2D.h"
+#include "Poligon_Function.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE g_hInst;
@@ -58,7 +56,7 @@ Point ConvertingWorldPos(HWND hWnd, Point pos)
     return temp;
 }
 Point ConvertingLocalPos(HWND hWnd, Point pos)
-{
+{// 어.. 
     RECT cRect;
     GetClientRect(hWnd, &cRect);
     int CenterX = cRect.right / 2;
@@ -117,9 +115,9 @@ void DrawTriangle(HWND hWnd, Point a, Point b, Point c)
 
 void DrawTriangle(HWND hWnd, Triangle2D& T)
 {
-    DrawLine(hWnd, T.getA().getPos(), T.getB().getPos(), RGB(0, 0, 0));
-    DrawLine(hWnd, T.getB().getPos(), T.getC().getPos(), RGB(0, 0, 0));
-    DrawLine(hWnd, T.getC().getPos(), T.getA().getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, T._A.getPos(), T._B.getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, T._B.getPos(), T._C.getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, T._C.getPos(), T._A.getPos(), RGB(0, 0, 0));
 }
 
 void SetMoveValue(Point a, Point b, Point* _val, int size)
@@ -153,8 +151,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
     static Triangle2D T;       // 실제 변경
     static Triangle2D CurrT;   // Paint 참조
 
-    static float XScale = 1;
-    static float YScale = 1;
+    static float scale_value = 1;
     static float rotValue;
     static Point moveValue; // 증가값
     // 항상 자료구조 생각하기
@@ -183,17 +180,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         moveValue = Point(0, 0);
         switch (wParam)
         {
-        case 'y':
-        case 'Y':
-            YScale = 1.01f;
+        case 'z':
+        case 'Z':
+            scale_value = 1.1f;
             break;
-        case 'x':
-        case 'X':
-            XScale = 1.01f;
+        case 'c':
+        case 'C':
+            scale_value = 0.9f;
             break;
-        case 'r':
-        case 'R':
-            rotValue = 0.25f;
+        case 'e':
+        case 'E':
+            rotValue = 0.3f;
+            break;
+        case 'q':
+        case 'Q':
+            rotValue = -0.3f;
             break;
         case 'w':
         case 'W':
@@ -215,8 +216,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
         break;
     case WM_KEYUP:
         is_keyinput = false;
-        XScale = 1;
-        YScale = 1;
+        scale_value = 1;
         rotValue = 0;
         moveValue = Point(0, 0);
         break;
@@ -228,7 +228,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
             mpos.x = LOWORD(lParam);
             mpos.y = HIWORD(lParam);
             convert = ConvertingLocalPos(hWnd, mpos);
-            SetMoveValue(T.getCenter().getPos(), convert, &moveValue, 10);   // 증가값 계산
+            SetMoveValue(T.Center.getPos(), convert, &moveValue, 10);   // 증가값 계산
             toggle = true;
         }
         break;  //
@@ -240,24 +240,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
                 toggle = false;
                 break;
             }
-            T.Move(moveValue);
+            Poligon_Function::Move(T, moveValue);
             CurrT = T;
-            //Triangle_Move_Matrix(T, CurrT, moveValue);
         }
 
         if (is_keyinput)
         {
-            T.Translate(moveValue);     // 이건 이동 키
-            T.Rotate_Z(rotValue);       // 
-            T.Scale(XScale, YScale, 1);
+            Poligon_Function::Translate(T, moveValue);
+            Poligon_Function::Rotate(T, rotValue);
+            Poligon_Function::Scale(T, scale_value, scale_value, (int)scale_value);
             CurrT = T;
         }
-            //Triangle_Move_Matrix(T, CurrT, moveValue);
 
         InvalidateRect(hWnd, NULL, TRUE);
         break;
     case WM_PAINT:
         hdc = BeginPaint(hWnd, &ps);
+
+        TextOut(hdc, 10, 10, TEXT("Translate : W, A, S, D"), strlen("Translate : W, A, S, D"));
+        TextOut(hdc, 10, 30, TEXT("Rotate : Q, E"), strlen("Rotate : Q, E"));
+        TextOut(hdc, 10, 50, TEXT("Scale : Z, C"), strlen("Scale : Z, C"));
+        TextOut(hdc, 10, 70, TEXT("Move to Point : LButtonDown"), strlen("Move to Point : LButtonDown"));
 
         for (int i = 0; i < AxisSize; i++)
         {

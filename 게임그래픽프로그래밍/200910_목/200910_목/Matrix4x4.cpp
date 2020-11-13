@@ -1,10 +1,13 @@
 #include "Matrix4x4.h"
 
+Matrix4x4 Matrix4x4::Identity = { 1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1 };
+Matrix4x4 Matrix4x4::Zero =		{ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+
 Matrix4x4::Matrix4x4()
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < Matrix4x4::SIZE; i++)
 	{
-		for (int j = 0; j < size; j++)
+		for (int j = 0; j < Matrix4x4::SIZE; j++)
 		{
 			if (i == j)
 				matrix[i][j] = 1;
@@ -13,21 +16,17 @@ Matrix4x4::Matrix4x4()
 		}
 	}
 }
-
 Matrix4x4::Matrix4x4(float m00, float m01, float m02, float m03, float m10, float m11,
 	float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
 {
-	size = 4;
-	matrix[0][0] = m00;	matrix[0][1] = m01;	matrix[0][2] = m02;	matrix[0][3] = m03;
-	matrix[1][0] = m10;	matrix[1][1] = m11;	matrix[1][2] = m12;	matrix[1][3] = m13;
-	matrix[2][0] = m20;	matrix[2][1] = m21;	matrix[2][2] = m22;	matrix[2][3] = m23;
-	matrix[3][0] = m30;	matrix[3][1] = m31;	matrix[3][2] = m32;	matrix[3][3] = m33;
+	_11 = m00;	_12 = m01;	_13 = m02;	_14 = m03;
+	_21 = m10;	_22 = m11;	_23 = m12;	_24 = m13;
+	_31 = m20;	_32 = m21;	_33 = m22;	_34 = m23;
+	_41 = m30;	_42 = m31;	_43 = m32;	_44 = m33;
 }
-
 Matrix4x4::Matrix4x4(float* line0, float* line1, float* line2, float* line3)
 {
-	size = 4;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < Matrix4x4::SIZE; i++)
 	{
 		matrix[0][i] = line0[i];
 		matrix[1][i] = line1[i];
@@ -35,186 +34,16 @@ Matrix4x4::Matrix4x4(float* line0, float* line1, float* line2, float* line3)
 		matrix[3][i] = line3[i];
 	}
 }
-
 Matrix4x4::Matrix4x4(Matrix4x4& _m)
 {
-	size = _m.size;
-	for (int i = 0; i < size; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
+	for (int i = 0; i < Matrix4x4::SIZE; i++)
+		for (int j = 0; j < Matrix4x4::SIZE; j++)
 			matrix[i][j] = _m.matrix[i][j];
-		}
-	}
 }
-
 Matrix4x4::~Matrix4x4()
 {
 
 }
 
-void Matrix4x4::Init()
-{
-	for (int i = 0; i < size; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			if (i == j)
-				matrix[i][j] = 1;
-			else
-				matrix[i][j] = 0;
-		}
-	}
-}
 
-void Matrix4x4::setEntry(int a, int b, float _val)
-{
-	if (a >= size || a < 0 || b >= size || b < 0)
-		return;
 
-	matrix[a][b] = _val;
-}
-
-float Matrix4x4::getEntry(int a, int b)
-{
-	if (a >= size || a < 0 || b >= size || b < 0)
-		return 0;
-
-	return matrix[a][b];
-}
-
-bool Matrix4x4::Equal(Matrix4x4& _m)
-{
-	bool flag = true;
-	for (int i = 0; i < size; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			if (matrix[i][j] != _m.matrix[i][j])
-				flag = false;
-		}
-	}
-
-	return flag;
-}
-
-Matrix4x4 Matrix4x4::Plus(Matrix4x4& _m)
-{
-	Matrix4x4 temp;
-
-	for (int i = 0; i < _m.size; i++)
-	{
-		for (int j = 0; j < _m.size; j++)
-		{
-			temp.matrix[i][j] = matrix[i][j] + _m.matrix[i][j];
-		}
-	}
-
-	return temp;
-}
-
-Matrix4x4 Matrix4x4::Minus(Matrix4x4& _m)
-{
-	Matrix4x4 temp;
-
-	for (int i = 0; i < _m.size; i++)
-	{
-		for (int j = 0; j < _m.size; j++)
-		{
-			temp.matrix[i][j] = matrix[i][j] - _m.matrix[i][j];
-		}
-	}
-
-	return temp;
-}
-
-Matrix4x4 Matrix4x4::Multiple(Matrix4x4& _m)
-{
-	Matrix4x4 temp;
-
-	for (int i = 0; i < size; i++)
-	{
-		for (int j = 0; j < size; j++)
-		{
-			temp.matrix[i][j] = 0;
-			for (int k = 0; k < size; k++)
-			{
-				temp.matrix[i][j] += (matrix[i][k] * _m.matrix[k][j]);
-			}
-		}
-	}
-
-	return temp;
-}
-
-void Matrix4x4::MatrixRotate_X(float _angle)
-{
-	Init();
-	_22 = cosf(_angle);
-	_23 = sinf(_angle);
-	_32 = -sinf(_angle);
-	_33 = cosf(_angle);
-
-}
-void Matrix4x4::MatrixRotate_Y(float _angle)
-{
-	Init();
-	_11 = cosf(_angle);
-	_13 = sinf(_angle);
-	_31 = -sinf(_angle);
-	_33 = cosf(_angle);
-}
-void Matrix4x4::MatrixRotate_Z(float _angle)
-{
-	Init();
-	_11 = cosf(_angle);
-	_12 = sinf(_angle);
-	_21 = -sinf(_angle);
-	_22 = cosf(_angle);
-}
-void Matrix4x4::MatrixTranslate(float _dx, float _dy, float _dz)
-{
-	Init();
-	_31 = _dx;
-	_32 = _dy;
-	_33 = _dz;
-}
-void Matrix4x4::MatrixScaling(float _Sx, float _Sy, float _Sz)
-{
-	Init();
-	_11 = _Sx;
-	_22 = _Sy;
-	_33 = _Sz;
-}
-
-Matrix1x4 Matrix4x4::Matrix1x4_Multiple(Matrix1x4& _m)
-{
-	Matrix1x4 temp;
-
-	temp.setEntry(0, (_m.getEntry(0) * matrix[0][0]) + (_m.getEntry(1) * matrix[1][0]) + (_m.getEntry(2) * matrix[2][0]) + (_m.getEntry(3) * matrix[3][0]));
-	temp.setEntry(1, (_m.getEntry(0) * matrix[0][1]) + (_m.getEntry(1) * matrix[1][1]) + (_m.getEntry(2) * matrix[2][1]) + (_m.getEntry(3) * matrix[3][1]));
-	temp.setEntry(2, (_m.getEntry(0) * matrix[0][2]) + (_m.getEntry(1) * matrix[1][2]) + (_m.getEntry(2) * matrix[2][2]) + (_m.getEntry(3) * matrix[3][2]));
-	temp.setEntry(3, (_m.getEntry(0) * matrix[0][3]) + (_m.getEntry(1) * matrix[1][3]) + (_m.getEntry(2) * matrix[2][3]) + (_m.getEntry(3) * matrix[3][3]));
-
-	return temp;
-}
-
-Vector3D Matrix4x4::Vector3D_Multiple(Vector3D& v1)
-{
-	Vector3D temp;
-
-	temp.setx((v1.getx() * matrix[0][0]) + (v1.gety() * matrix[1][0]) + (v1.getz() * matrix[2][0]) + (v1.getw() * matrix[3][0]));
-	temp.sety((v1.getx() * matrix[0][1]) + (v1.gety() * matrix[1][1]) + (v1.getz() * matrix[2][1]) + (v1.getw() * matrix[3][1]));
-	temp.setz((v1.getx() * matrix[0][2]) + (v1.gety() * matrix[1][2]) + (v1.getz() * matrix[2][2]) + (v1.getw() * matrix[3][2]));
-	temp.setw((v1.getx() * matrix[0][3]) + (v1.gety() * matrix[1][3]) + (v1.getz() * matrix[2][3]) + (v1.getw() * matrix[3][3]));
-
-	return temp;
-}
-
-void Matrix4x4::Show()
-{
-	for (int i = 0; i < size; i++)
-	{
-		printf("%3.0f %3.0f %3.0f %3.0f\n", matrix[i][0], matrix[i][1], matrix[i][2], matrix[i][3]);
-	}
-}
