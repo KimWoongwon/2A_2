@@ -31,10 +31,10 @@ Matrix1x4::Matrix1x4(Matrix1x4& _m)
 }
 Matrix1x4::Matrix1x4(Vector3D& _v)
 {
-	_11 = _v.getx();
-	_12 = _v.gety();
-	_13 = _v.getz();
-	_14 = _v.getw();
+	_11 = _v.x;
+	_12 = _v.y;
+	_13 = _v.z;
+	_14 = _v.w;
 }
 
 Matrix1x4::~Matrix1x4()
@@ -64,15 +64,12 @@ Matrix4x1::Matrix4x1(float m11, float m21, float m31, float m41)
 
 Matrix4x1::Matrix4x1(float* line0)
 {
-	for (int i = 0; i < xsize; i++)
+	for (int i = 0; i < Matrix4x1::XSIZE; i++)
 		matrix[0][i] = line0[i];
 }
 
 Matrix4x1::Matrix4x1(Matrix4x1& _m)
 {
-	xsize = _m.xsize;
-	ysize = _m.ysize;
-
 	_11 = _m._11;
 	_21 = _m._21;
 	_31 = _m._31;
@@ -81,10 +78,10 @@ Matrix4x1::Matrix4x1(Matrix4x1& _m)
 
 Matrix4x1::Matrix4x1(Vector3D& _v)
 {
-	_11 = _v.getx();
-	_21 = _v.gety();
-	_31 = _v.getz();
-	_41 = _v.getw();
+	_11 = _v.x;
+	_21 = _v.y;
+	_31 = _v.z;
+	_41 = _v.w;
 }
 
 Matrix4x1::~Matrix4x1()

@@ -31,9 +31,9 @@ Matrix1x3::Matrix1x3(Matrix1x3& _m)
 }
 Matrix1x3::Matrix1x3(Vector2D& _v)
 {
-	_11 = _v.getx();
-	_12 = _v.gety();
-	_13 = _v.getw();
+	_11 = _v.x;
+	_12 = _v.y;
+	_13 = _v.w;
 }
 
 Matrix1x3::~Matrix1x3()
@@ -75,9 +75,9 @@ Matrix3x1::Matrix3x1(Matrix3x1& _m)
 
 Matrix3x1::Matrix3x1(Vector2D& _v)
 {
-	_11 = _v.getx();
-	_21 = _v.gety();
-	_31 = _v.getw();
+	_11 = _v.x;
+	_21 = _v.y;
+	_31 = _v.w;
 }
 
 Matrix3x1::~Matrix3x1()

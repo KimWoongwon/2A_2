@@ -26,7 +26,5 @@ public:
 	~Triangle2D();
 
 	void setCenter();
-
-	
 };
 

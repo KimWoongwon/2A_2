@@ -1,5 +1,6 @@
 #include <windows.h>
-#include "Poligon_Function.h"
+#include "Polygon_Function.h"
+#include "Characters.h"
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 HINSTANCE g_hInst;
@@ -68,10 +69,28 @@ Point ConvertingLocalPos(HWND hWnd, Point pos)
     return temp;
 }
 
-void DrawLine(HWND hWnd, Point a, Point b, COLORREF color)
+float GetDistance(Vector2D a, Vector2D b)
 {
-    HDC hdc;
-    hdc = GetDC(hWnd);
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+
+    float distance = sqrtf(powf(dx, 2) + powf(dy, 2));
+
+    return distance;
+}
+
+float GetAtan2(Vector2D& a, Vector2D& b)
+{
+    Vector2D vec;
+    vec = b - a;
+    float angle = atan2f(vec.y, vec.x) * 180 / 3.141592;
+    if (angle < 0)
+        angle += 360;
+    return angle;
+}
+
+void DrawLine(HWND hWnd, HDC hdc, Point a, Point b, COLORREF color)
+{
     int DomainCount;
 
     float dx = b.x - a.x;
@@ -102,23 +121,47 @@ void DrawLine(HWND hWnd, Point a, Point b, COLORREF color)
             break;
     }
 
-    ReleaseDC(hWnd, hdc);
 }
-
-
-void DrawTriangle(HWND hWnd, Point a, Point b, Point c) 
+void DrawCircleCollider(HDC hdc, Circle_Collider& collider)
 {
-    DrawLine(hWnd, a, b, RGB(0, 0, 0));
-    DrawLine(hWnd, b, c, RGB(0, 0, 0));
-    DrawLine(hWnd, c, a, RGB(0, 0, 0));
+    Point temp;
+    float dx, dy;
+
+    for (float i = 0; i < 360; i += 0.25)
+    {
+        float angle = i * 3.141592 / 180;
+        dx = collider.radius * cosf(angle);
+        dy = collider.radius * sinf(angle);
+
+        dx += collider.Center.getPos().x;
+        dy += collider.Center.getPos().y;
+
+        SetPixel(hdc, dx, dy, collider.color);
+    }
 }
 
-void DrawTriangle(HWND hWnd, Triangle2D& T)
+void DrawTriangle(HWND hWnd, HDC hdc, Point a, Point b, Point c) 
 {
-    DrawLine(hWnd, T._A.getPos(), T._B.getPos(), RGB(0, 0, 0));
-    DrawLine(hWnd, T._B.getPos(), T._C.getPos(), RGB(0, 0, 0));
-    DrawLine(hWnd, T._C.getPos(), T._A.getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, hdc, a, b, RGB(0, 0, 0));
+    DrawLine(hWnd, hdc, b, c, RGB(0, 0, 0));
+    DrawLine(hWnd, hdc, c, a, RGB(0, 0, 0));
 }
+void DrawTriangle(HWND hWnd, HDC hdc, Triangle2D& T)
+{
+    DrawLine(hWnd, hdc, T._A.getPos(), T._B.getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, hdc, T._B.getPos(), T._C.getPos(), RGB(0, 0, 0));
+    DrawLine(hWnd, hdc, T._C.getPos(), T._A.getPos(), RGB(0, 0, 0));
+}
+
+
+void DrawTriangle(HWND hWnd, HDC hdc, Triangle2D& T, COLORREF color)
+{
+    DrawLine(hWnd, hdc, T._A.getPos(), T._B.getPos(), color);
+    DrawLine(hWnd, hdc, T._B.getPos(), T._C.getPos(), color);
+    DrawLine(hWnd, hdc, T._C.getPos(), T._A.getPos(), color);
+}
+
+
 
 void SetMoveValue(Point a, Point b, Point* _val, int size)
 {
@@ -134,142 +177,280 @@ void SetMoveValue(Point a, Point b, Point* _val, int size)
     _val->y = dy;
 }
 
-void RotateZ(Triangle2D& _T, float theta)
+void SetMoveValue(Point a, Point b, Point* _val, float speed, float& size)
 {
+    *_val = Point(0, 0);
 
+    float dx = b.x - a.x;
+    float dy = b.y - a.y;
+
+    float distance = sqrtf(powf(dx, 2) + powf(dy, 2));
+    size = distance / speed;
+
+    dx = dx / (float)size;
+    dy = dy / (float)size;
+
+    _val->x = dx;
+    _val->y = dy;
 }
+
+void CreateCollider(HWND hWnd, Triangle2D& _t, Circle_Collider& collider)
+{
+    Point temp;
+    temp = ConvertingWorldPos(hWnd, _t.Center.getPos());
+
+    Vector2D vec_temp(temp.x, temp.y);
+    collider.Update(vec_temp, GetDistance(_t.Center, _t._A));
+}
+
+void Collision(Circle_Collider& _c1, Circle_Collider& _c2)
+{
+    float min_distance = _c1.radius + _c2.radius;
+
+    if (!_c1.enabled || !_c2.enabled)
+        return;
+
+    if (min_distance >= GetDistance(_c1.Center, _c2.Center))
+    {
+        _c1.hit = true;
+        _c2.hit = true;
+
+        _c1.color = RGB(255, 0, 255);
+        _c2.color = RGB(255, 0, 255);
+    }
+    else
+    {
+        _c1.hit = false;
+        _c2.hit = false;
+
+        _c1.color = RGB(0, 255, 0);
+        _c2.color = RGB(0, 255, 0);
+    }
+    
+}
+#define MOVESPEED 10
+#define MIN_DISTANCE 300
+#define MAX_DISTANCE 500
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
     PAINTSTRUCT ps;
-    HDC hdc;
+    HDC hdc, BACKDC;
+    HBITMAP backBitmap, OldBackBitmap;
     static RECT rect;
-    static Point xAxis[AxisSize];
-    static Point yAxis[AxisSize];
 
     static Point mpos, convert;
-    static Triangle2D T;       // 실제 변경
-    static Triangle2D CurrT;   // Paint 참조
-
-    static float scale_value = 1;
-    static float rotValue;
-    static Point moveValue; // 증가값
+    static float angle;
+    static int ei = 0;
+    static int i = 0;
     // 항상 자료구조 생각하기
 
-    static bool toggle = 0;
-    static bool is_keyinput = false;
-    static int i = 0;
+    static Player<Triangle2D> player;
+    static Enemy<Triangle2D> enemy(4);
+    
+    static Point temp;
+    
+    
     switch (iMessage) {
     case WM_CREATE:
         GetClientRect(hWnd, &rect);
 
-        T = Triangle2D(0,125,-75,0,75,0);
-        CurrT = T;
+        // Player Initalize
+        player.Model = Triangle2D(0, 125, -75, 0, 75, 0);
+        player.Setting_Model();
 
-        /*T[0].setPos(0, 125);
-        T[1].setPos(-75, 0);
-        T[2].setPos(75, 0);
-        Triangle_Copy(T, CurrT);*/
+        CreateCollider(hWnd, player.Model, player.collider);
+        player.collider.color = RGB(0, 255, 0);
+        
+        // Enemy Initalize
+        enemy.Model = Triangle2D(300, -175, 225, -300, 375, -300);
+        enemy.Setting_Model();
+
+        CreateCollider(hWnd, enemy.Model, enemy.collider);
+        enemy.collider.color = RGB(0, 255, 0);
+
+        enemy.WayPoints[0].setPos( Point(100, -250));
+        enemy.WayPoints[1].setPos( Point(600, -250));
+        enemy.WayPoints[2].setPos( Point(600, 250));
+        enemy.WayPoints[3].setPos( Point(100, 250));
 
         SetTimer(hWnd, 1, 50, NULL);
         break;
     case WM_KEYDOWN:
-        is_keyinput = true;
+        player.is_keyinput = true;
+        
         break;
     case WM_CHAR:
-        moveValue = Point(0, 0);
-        switch (wParam)
-        {
-        case 'z':
-        case 'Z':
-            scale_value = 1.1f;
-            break;
-        case 'c':
-        case 'C':
-            scale_value = 0.9f;
-            break;
-        case 'e':
-        case 'E':
-            rotValue = 0.3f;
-            break;
-        case 'q':
-        case 'Q':
-            rotValue = -0.3f;
-            break;
-        case 'w':
-        case 'W':
-            moveValue.y = 10.0f;
-            break;
-        case 's':
-        case 'S':
-            moveValue.y = -10.0f;
-            break;
-        case 'a':
-        case 'A':
-            moveValue.x = -10.0f;
-            break;
-        case 'd':
-        case 'D':
-            moveValue.x = 10.0f;
-            break;
-        }
+        // Keyboard Move
+        player.move_val = Point(0, 0);
+        if (wParam == 'z' || wParam == 'Z')
+            player.scale_val = 1.1f;
+        else if (wParam == 'c' || wParam == 'C')
+            player.scale_val = 0.9f;
+
+        if (wParam == 'e' || wParam == 'E')
+            player.rotate_val = 5;
+        else if (wParam == 'q' || wParam == 'Q')
+            player.rotate_val = -5;
+
+        if (wParam == 'w' || wParam == 'W')
+            player.move_val.y = MOVESPEED * 2;
+        else if (wParam == 's' || wParam == 'S')
+            player.move_val.y = -MOVESPEED * 2;
+
+        if (wParam == 'a' || wParam == 'A')
+            player.move_val.x = -MOVESPEED * 2;
+        else if (wParam == 'd' || wParam == 'D')
+            player.move_val.x = MOVESPEED * 2;
+
         break;
     case WM_KEYUP:
-        is_keyinput = false;
-        scale_value = 1;
-        rotValue = 0;
-        moveValue = Point(0, 0);
+        player.is_keyinput = false;
+        player.Reset_value();
         break;
     case WM_LBUTTONDOWN:
-        if (!toggle)
+        // Mouse Move
+        if (!player.is_keyinput)
         {
-            moveValue = Point(0, 0);
+            player.move_val = Point::Zero;
+            player.toggle = true;
+
             i = 0;
             mpos.x = LOWORD(lParam);
             mpos.y = HIWORD(lParam);
             convert = ConvertingLocalPos(hWnd, mpos);
-            SetMoveValue(T.Center.getPos(), convert, &moveValue, 10);   // 증가값 계산
-            toggle = true;
+            SetMoveValue(player.Model.Center.getPos(), convert, &player.move_val, MOVESPEED * 2, player.movecount);   // 증가값 계산
         }
-        break;  //
+        break;  
     case WM_TIMER:
-        if (toggle)
+        if (player.toggle)     // player mouse clieked move
         {
-            if (i++ >= 10)
+            if (i++ <= player.movecount)
             {
-                toggle = false;
+                Polygon_Function::Move(player.Model, player.move_val);
+                CreateCollider(hWnd, player.Model, player.collider);
+                player.Setting_Model();
+            }
+        }
+        
+        if (player.is_keyinput)    // player WASD move
+        {
+            Polygon_Function::Translate(player.Model, player.move_val);
+            Polygon_Function::Rotate(player.Model, player.rotate_val);
+            Polygon_Function::Scale(player.Model, player.scale_val, player.scale_val, (int)player.scale_val);
+            CreateCollider(hWnd, player.Model, player.collider);
+            player.Setting_Model();
+        }
+
+        if (enemy.is_move)   // enemy romaing
+        {
+            // enemy Following Start
+            if (GetDistance(player.Model.Center, enemy.Model.Center) <= MIN_DISTANCE)  
+            {
+                SetMoveValue(enemy.Model.Center.getPos(), player.Model.Center.getPos(), &enemy.move_val, MOVESPEED, enemy.movecount);
+                ei = 0;
+                enemy.is_following = true;
+                angle = -GetAtan2(enemy.Model.Center, player.Curr_Model.Center) + 90;
+            }
+            // enemy Following End
+            else if(enemy.is_following && GetDistance(player.Model.Center, enemy.Model.Center) <= MAX_DISTANCE)
+            {
+                enemy.is_move = false;
+                enemy.is_following = false;
+
+                float distance = GetDistance(enemy.Model.Center, enemy.WayPoints[enemy.nextIndex]);
+                for (int i = 0; i < 4; i++)
+                {
+                    float temp = GetDistance(enemy.Model.Center, enemy.WayPoints[i]);
+                    if (distance < temp)
+                    {
+                        distance = temp;
+                        enemy.nextIndex = i + 1;
+                    }
+                }
+            }
+            // Enemy Roming End
+            else if (ei++ >= enemy.movecount)
+            {
+                enemy.is_move = false;
                 break;
             }
-            Poligon_Function::Move(T, moveValue);
-            CurrT = T;
-        }
 
-        if (is_keyinput)
+            Polygon_Function::Translate(enemy.Model, enemy.move_val);
+            CreateCollider(hWnd, enemy.Model, enemy.collider);
+            enemy.Setting_Model();
+            Polygon_Function::Rotate(enemy.Curr_Model, angle);
+        }
+        else  
         {
-            Poligon_Function::Translate(T, moveValue);
-            Poligon_Function::Rotate(T, rotValue);
-            Poligon_Function::Scale(T, scale_value, scale_value, (int)scale_value);
-            CurrT = T;
+            // next waypoint set
+            ei = 0;
+            enemy.nextIndex = ++enemy.nextIndex % 4;  // 도착하면 다음 웨이 포인트로
+            angle = -GetAtan2(enemy.Model.Center, enemy.WayPoints[enemy.nextIndex]) + 90;  // 회전 계산
+            
+            SetMoveValue(enemy.Model.Center.getPos(), enemy.WayPoints[enemy.nextIndex].getPos(), &enemy.move_val, MOVESPEED, enemy.movecount);
+            enemy.is_move = true;
         }
 
+        Collision(player.collider, enemy.collider);
         InvalidateRect(hWnd, NULL, TRUE);
         break;
-    case WM_PAINT:
+    case WM_PAINT:  // 더블 버퍼링
         hdc = BeginPaint(hWnd, &ps);
+        BACKDC = CreateCompatibleDC(hdc);
+        backBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+        OldBackBitmap = (HBITMAP)SelectObject(BACKDC, backBitmap);
 
-        TextOut(hdc, 10, 10, TEXT("Translate : W, A, S, D"), strlen("Translate : W, A, S, D"));
-        TextOut(hdc, 10, 30, TEXT("Rotate : Q, E"), strlen("Rotate : Q, E"));
-        TextOut(hdc, 10, 50, TEXT("Scale : Z, C"), strlen("Scale : Z, C"));
-        TextOut(hdc, 10, 70, TEXT("Move to Point : LButtonDown"), strlen("Move to Point : LButtonDown"));
+        PatBlt(BACKDC, 0, 0, rect.right, rect.bottom, WHITENESS);
+        
+        TextOut(BACKDC, 10, 10, TEXT("Translate : W, A, S, D"), strlen("Translate : W, A, S, D"));
+        TextOut(BACKDC, 10, 30, TEXT("Rotate : Q, E"), strlen("Rotate : Q, E"));
+        TextOut(BACKDC, 10, 50, TEXT("Scale : Z, C"), strlen("Scale : Z, C"));
+        TextOut(BACKDC, 10, 70, TEXT("Move to Point : LButtonDown"), strlen("Move to Point : LButtonDown"));
 
         for (int i = 0; i < AxisSize; i++)
         {
-            SetPixel(hdc, i, rect.bottom / 2, RGB(0, 0, 0));
-            SetPixel(hdc, rect.right / 2, i, RGB(0, 0, 0));
+            SetPixel(BACKDC, i, rect.bottom / 2, RGB(0, 0, 0));
+            SetPixel(BACKDC, rect.right / 2, i, RGB(0, 0, 0));
         }
+        
+        for (int i = 0; i < 4; i++)
+        {
+            char waytext[20];
+            Point temp = ConvertingWorldPos(hWnd, enemy.WayPoints[i].getPos());
+            sprintf_s(waytext, "WayPoint %d", i + 1);
 
-        DrawTriangle(hWnd, CurrT);
+            TextOut(BACKDC, temp.x - strlen(waytext) * 5, temp.y - 20, waytext, strlen(waytext));
+            Ellipse(BACKDC, temp.x - 5, temp.y - 5, temp.x + 5, temp.y + 5);
+        }
+        
+        // Draw Enemy Entry
+        
+        if(enemy.is_following)
+            DrawTriangle(hWnd, BACKDC, enemy.Curr_Model, RGB(255, 0, 0));
+        else 
+            DrawTriangle(hWnd, BACKDC, enemy.Curr_Model, RGB(0, 255, 0));
 
+        enemy.Foward = ConvertingWorldPos(hWnd, enemy.Curr_Model._A.getPos());
+        Ellipse(BACKDC, enemy.Foward.x - 5, enemy.Foward.y - 5, enemy.Foward.x + 5, enemy.Foward.y + 5);
+
+        DrawCircleCollider(BACKDC, enemy.collider);
+        Ellipse(BACKDC, temp.x - 5, temp.y - 5, temp.x + 5, temp.y + 5);
+
+        
+
+        DrawTriangle(hWnd, BACKDC, player.Curr_Model);
+
+        player.Foward = ConvertingWorldPos(hWnd, player.Curr_Model._A.getPos());
+        Ellipse(BACKDC, player.Foward.x - 5, player.Foward.y - 5, player.Foward.x + 5, player.Foward.y + 5);
+
+        DrawCircleCollider(BACKDC, player.collider);
+
+        BitBlt(hdc, 0, 0, rect.right, rect.bottom, BACKDC, 0, 0, SRCCOPY);
+
+        SelectObject(BACKDC, OldBackBitmap);
+        DeleteDC(BACKDC);
+        DeleteObject(backBitmap);
         EndPaint(hWnd, &ps);
         break;
     case WM_DESTROY:

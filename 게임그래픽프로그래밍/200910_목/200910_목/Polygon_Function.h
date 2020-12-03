@@ -2,7 +2,7 @@
 #include "Triangle2D.h"
 #include "Matrix_Function.h"
 
-namespace Poligon_Function
+namespace Polygon_Function
 {
 	void Move(Triangle2D&, const Point&);
 	void Translate(Triangle2D&, const Point&);

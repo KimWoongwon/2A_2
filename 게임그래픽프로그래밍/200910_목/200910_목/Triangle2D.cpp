@@ -4,7 +4,7 @@
 Triangle2D::Triangle2D()
 {
 	for (int i = 0; i < Vertex_Count; i++)
-		vertex[i].setZero();
+		vertex[i] = Vector2D::Zero;
 }
 Triangle2D::Triangle2D(Triangle2D& temp)
 {
@@ -31,13 +31,13 @@ Triangle2D::~Triangle2D()
 }
 void Triangle2D::setCenter()
 {
-	float da = sqrtf(powf(_B.getx() - _A.getx(), 2) + powf(_B.gety() - _A.gety(), 2));	// Line AB
-	float db = sqrtf(powf(_C.getx() - _B.getx(), 2) + powf(_C.gety() - _B.gety(), 2));	// Line BC
-	float dc = sqrtf(powf(_A.getx() - _C.getx(), 2) + powf(_A.gety() - _C.gety(), 2));	// Line CA
+	float da = sqrtf(powf(_B.x - _A.x, 2) + powf(_B.y - _A.y, 2));	// Line AB
+	float db = sqrtf(powf(_C.x - _B.x, 2) + powf(_C.y - _B.y, 2));	// Line BC
+	float dc = sqrtf(powf(_A.x - _C.x, 2) + powf(_A.y - _C.y, 2));	// Line CA
 
-	float tx = ((da * _C.getx()) + (db * _A.getx()) + (dc * _B.getx())) / (da + db + dc);
-	this->Center.setx(tx);
+	float tx = ((da * _C.x) + (db * _A.x) + (dc * _B.x)) / (da + db + dc);
+	this->Center.x = tx;
 
-	float ty = ((da * _C.gety()) + (db * _A.gety()) + (dc * _B.gety())) / (da + db + dc);
-	this->Center.sety(ty);
+	float ty = ((da * _C.y) + (db * _A.y) + (dc * _B.y)) / (da + db + dc);
+	this->Center.y = ty;
 }

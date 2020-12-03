@@ -42,7 +42,10 @@
     <ClCompile Include="Matrix_Function.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Poligon_Function.cpp">
+    <ClCompile Include="Polygon_Function.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Characters.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -79,7 +82,10 @@
     <ClInclude Include="Matrix_Function.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Poligon_Function.h">
+    <ClInclude Include="Polygon_Function.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Characters.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
